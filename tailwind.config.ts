@@ -52,6 +52,7 @@ const config: Config = {
         fadeIn:  { from: { opacity: "0" },                        to: { opacity: "1" } },
         slideUp: { from: { opacity: "0", transform: "translateY(24px)" }, to: { opacity: "1", transform: "translateY(0)" } },
         slideIn: { from: { opacity: "0", transform: "translateX(-24px)" }, to: { opacity: "1", transform: "translateX(0)" } },
+        countUp: { from: { opacity: "0", transform: "translateY(10px)" }, to: { opacity: "1", transform: "translateY(0)" } },
         flip:    { "0%": { transform: "rotateY(0deg)" },          "100%": { transform: "rotateY(180deg)" } },
       },
     },

@@ -1,8 +1,8 @@
-import type { DocType, DocRecord, ExtractedField, DocStatus } from "./schema";
+import type { DocType, ExtractedField, DocStatus } from "./schema";
 import { createRequire } from "module";
-const _req = createRequire("/Users/morrisishoka/Desktop/circuland/node_modules/pdf-parse/package.json");
+const _req = createRequire(import.meta.url);
 const { PDFParse } = _req("pdf-parse") as {
-  PDFParse: new () => { pdf(b: Buffer): Promise<{ text: string }> };
+  PDFParse: new (opts: { data: Buffer }) => { getText(): Promise<{ text: string }> };
 };
 
 // ─── Type classification rules ────────────────────────────────────────────────
@@ -48,7 +48,7 @@ const TYPE_RULES: Array<{
   },
   {
     type: "iso_14001", label: "ISO 14001 Certificate",
-    score: (t, n) =>
+    score: (t, _n) =>
       (/ISO\s*14001/i.test(t) ? 70 : 0) +
       (/environmental\s+management\s+system/i.test(t) ? 20 : 0) +
       (/certificate\s+of\s+registration|accredited/i.test(t) ? 10 : 0),
@@ -56,7 +56,7 @@ const TYPE_RULES: Array<{
   },
   {
     type: "iso_9001", label: "ISO 9001 Certificate",
-    score: (t, n) =>
+    score: (t, _n) =>
       (/ISO\s*9001/i.test(t) ? 70 : 0) +
       (/quality\s+management\s+system/i.test(t) ? 20 : 0) +
       (/certificate\s+of\s+registration|accredited/i.test(t) ? 10 : 0),
@@ -115,9 +115,8 @@ const TYPE_RULES: Array<{
 ];
 
 // ─── Date extraction helpers ──────────────────────────────────────────────────
-const ISO_DATE  = /(\d{4}-\d{2}-\d{2})/g;
-const UK_DATE   = /(\d{1,2})[./](\d{1,2})[./](\d{4})/g;
-const YEAR_ONLY = /\b(20\d{2})\b/g;
+const ISO_DATE = /(\d{4}-\d{2}-\d{2})/g;
+const UK_DATE  = /(\d{1,2})[./](\d{1,2})[./](\d{4})/g;
 
 function extractDates(text: string): string[] {
   const dates: string[] = [];
@@ -238,7 +237,7 @@ export async function classifyDocument(
   let text = "";
   if (mimeType === "application/pdf" || fileName.endsWith(".pdf")) {
     try {
-      const parsed = await new PDFParse().pdf(buffer);
+      const parsed = await new PDFParse({ data: buffer }).getText();
       text = parsed.text ?? "";
     } catch {
       text = "";

@@ -1,8 +1,10 @@
 
 
 const nextConfig = {
-  // Keep pdf-parse as a native Node.js require — do not bundle through webpack
-  serverExternalPackages: ["pdf-parse"],
+  experimental: {
+    // Keep pdf-parse / pdfjs-dist as native Node.js requires — do not bundle through webpack
+    serverComponentsExternalPackages: ["pdf-parse", "pdfjs-dist"],
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**.unsplash.com" },
