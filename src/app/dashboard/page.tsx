@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   FileText,
@@ -461,6 +463,29 @@ const checklistItems = [
 ───────────────────────────────────────────── */
 export default function DashboardPage() {
   const [collapsed, setCollapsed] = useState(false);
+  const [dashData, setDashData] = useState<Record<string, unknown> | null>(null);
+  const [loadingData, setLoadingData] = useState(true);
+  const router = useRouter();
+  const supabase = createClient();
+
+  useEffect(() => {
+    fetch("/api/dashboard")
+      .then((r) => r.json())
+      .then((d) => { setDashData(d); setLoadingData(false); })
+      .catch(() => setLoadingData(false));
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
+  // Merge live data over mock fallbacks
+  const metrics = dashData?.metrics as Record<string, number> | undefined;
+  const livePassports = dashData?.recentPassports as typeof dppRows | undefined;
+  const liveCompliance = dashData?.compliance as { check_name: string; status: string }[] | undefined;
+  const orgName = (dashData?.org as { name?: string })?.name;
+  const userName = (dashData?.user as { fullName?: string })?.fullName;
 
   return (
     <div className="flex h-screen bg-zinc-50 overflow-hidden font-sans">
