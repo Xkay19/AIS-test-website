@@ -1,5 +1,8 @@
 "use client";
 
+// Dashboard is always server-rendered on demand — never pre-rendered at build time
+export const dynamic = "force-dynamic";
+
 import React, { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
