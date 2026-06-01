@@ -4,7 +4,6 @@
 export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -469,8 +468,8 @@ export default function DashboardPage() {
   const [dashData, setDashData] = useState<Record<string, unknown> | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const router = useRouter();
-  const supabase = createClient();
 
+  // Create Supabase client lazily inside effects only — avoids SSR crash when env vars missing
   useEffect(() => {
     fetch("/api/dashboard")
       .then((r) => r.json())
@@ -479,7 +478,13 @@ export default function DashboardPage() {
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    try {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {
+      // Supabase not configured — just redirect
+    }
     router.push("/login");
   };
 
